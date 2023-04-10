@@ -7,6 +7,7 @@
 import torch
 
 from functools import partial
+from torch.utils.model_zoo import load_url
 
 from .modeling import ImageEncoderViT, MaskDecoder, PromptEncoder, Sam, TwoWayTransformer
 
@@ -101,7 +102,10 @@ def _build_sam(
     )
     sam.eval()
     if checkpoint is not None:
-        with open(checkpoint, "rb") as f:
-            state_dict = torch.load(f)
+        if checkpoint.startswith('https://'):
+            state_dict = load_url(checkpoint)
+        else:
+            with open(checkpoint, "rb") as f:
+                state_dict = torch.load(f)
         sam.load_state_dict(state_dict)
     return sam
